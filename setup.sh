@@ -7,7 +7,7 @@ if [[ $EUID -ne 0 ]]; then
 else
 
 COIN="BitCore"
-SETUP="[A-Z]" "[a-z]"
+SETUP=$(echo ${COIN} | tr '[:upper:]' '[:lower:]')
 OS=$(cat /etc/os-release | grep ID=raspbian)
 GIT_URL="https://github.com/SpecTurrican/PI_${COIN}"
 INSTALL_DIR="/root/PI_${COIN}/"
