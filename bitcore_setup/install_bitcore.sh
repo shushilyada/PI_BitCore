@@ -180,7 +180,7 @@ set_network () {
 
 	ipaddr=$(ip route get 1 | awk '{print $NF;exit}')
 
-	hhostname="$(COIN_NAME)$(shuf -i 100000000-999999999 -n 1)"
+	hhostname="$(COIN)$(shuf -i 100000000-999999999 -n 1)"
 
 	echo $hhostname > /etc/hostname && hostname -F /etc/hostname
 
