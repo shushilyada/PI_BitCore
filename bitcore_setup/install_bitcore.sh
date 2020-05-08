@@ -7,7 +7,7 @@ COIN_PORT="8555"
 COIN_RPCPORT="8556"
 COIN_DOWNLOAD="https://github.com/LIMXTEC/${COIN_NAME}"
 COIN_BLOCKCHAIN_VERSION="z_bootstrap"
-COIN_BLOCKCHAIN="https://github.com/LIMXTEC/${COIN_NAME}/releases/download/0.90.9.1/z_bootstrap.zip"
+COIN_BLOCKCHAIN="https://github.com/LIMXTEC/${COIN_NAME}/releases/download/0.90.9.1/${COIN_BLOCKCHAIN_VERSION}.zip"
 COIND="/usr/local/bin/${COIN}d"
 COIN_CLI="/usr/local/bin/${COIN}-cli"
 COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
@@ -54,7 +54,7 @@ start () {
 	#
 	# Welcome
 
-	echo "*** Welcome to the ${COIN_NAME}world ***"
+	echo "*** Welcome to the ${COIN_NAME} World ***"
 	echo ""
 	echo ""
 	echo "Please wait... now configuration the system!"
@@ -110,8 +110,8 @@ manage_swap () {
 
 	fi
 
-	# On a Raspberry Pi 3, the default swap is 100MB. This is a little restrictive, so we are
-	# expanding it to a full 1GB of swap.
+	# On a Raspberry Pi, the default swap is 100MB. This is a little restrictive, so we are
+	# expanding it to a full 2GB of swap.
 
 	if [ ! -z "$checkForRaspbian" ]; then
 
@@ -456,7 +456,7 @@ configure_service () {
 	TimeoutStopSec=90s
 	TimeoutStartSec=90s
 	StartLimitInterval=180s
-	StartLimitBurst=5
+	StartLimitBurst=15
 	[Install]
 	WantedBy=multi-user.target
 
