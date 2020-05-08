@@ -303,11 +303,11 @@ make_db () {
 make_coin () {
 
 	#
-	# make the wallet (without gui)
+	# make the wallet (with qt)
 
 	cd $COIN_INSTALL
 	./autogen.sh
-	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768"
+	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
 	if [ "$CPU_CORE" = "4" ]; then
 		make -j2 && make install
 	else
@@ -525,6 +525,7 @@ watch_synch () {
 }
 
 
+
 finish () {
 
 	#
@@ -539,6 +540,11 @@ finish () {
 
 	/usr/bin/crontab -u root -r
 
+	#
+	# Install Raspian minimal GUI
+	
+	apt-get install --no-install-recommends xserver-xorg xinit raspberrypi-ui-mods lxsession -y
+		
 	chage -d 0 ${ssuser}
 
 	echo " "
