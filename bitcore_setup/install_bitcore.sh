@@ -27,7 +27,7 @@ DB_DOWNLOAD="http://download.oracle.com/berkeley-db/${DB_FILE}"
 
 # LIBRARIES and DEV_TOOLS
 LIBRARIES="libssl-dev libboost-all-dev libevent-dev libzmq3-dev"
-DEV_TOOLS="build-essential libtool autotools-dev autoconf cmake pkg-config bsdmainutils git unzip fail2ban ufw python3 pkg-config autotools-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libqrencode-dev"
+DEV_TOOLS="build-essential libtool autotools-dev autoconf cmake pkg-config bsdmainutils git jq unzip fail2ban ufw python3 pkg-config autotools-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libqrencode-dev"
 
 # Wallet RPC user and password
 rrpcuser="${COIN}pi$(shuf -i 100000000-199999999 -n 1)"
@@ -308,11 +308,11 @@ make_coin () {
 	cd $COIN_INSTALL
 	./autogen.sh
 	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
-	if [ "$CPU_CORE" = "4" ]; then
-		make -j2 && make install
-	else
+	#if [ "$CPU_CORE" = "4" ]; then
+	#	make -j2 && make install
+	#else
 		make && make install
-	fi
+	#fi
 
 
 }
@@ -480,7 +480,7 @@ checkrunning () {
 
 	while ! ${COIN_CLI} -getinfo >/dev/null 2>&1; do
 		sleep 5
-		error=$(${COIN_CLI} getinfo 2>&1 | cut -d: -f4 | tr -d "}")
+		error=$(${COIN_CLI} -getinfo 2>&1 | cut -d: -f4 | tr -d "}")
 		echo " ... ${COIN}.service is on : ${error}"
 		sleep 2
 	done
