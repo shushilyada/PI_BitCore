@@ -278,7 +278,7 @@ restart_pi () {
 
 	sleep 30
 
-	reboot
+	/sbin/reboot
 
 }
 
@@ -561,7 +561,7 @@ finish () {
 
 	sleep 60s
 
-	reboot
+	/sbin/reboot
 
 
 }
