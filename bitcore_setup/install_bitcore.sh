@@ -26,7 +26,7 @@ DB_FILE="db-${DB_VERSION}.NC.tar.gz"
 DB_DOWNLOAD="http://download.oracle.com/berkeley-db/${DB_FILE}"
 
 # LIBRARIES and DEV_TOOLS
-LIBRARIES="libssl-dev libboost-all-dev libevent-dev libzmq3-dev"
+LIBRARIES="libssl1.0-dev libboost-all-dev libevent-dev libzmq3-dev"
 DEV_TOOLS="build-essential libtool autotools-dev autoconf cmake pkg-config bsdmainutils git jq unzip fail2ban ufw python3 pkg-config autotools-dev libqt5gui5 libqt5core5a libqt5dbus5 qttools5-dev qttools5-dev-tools libprotobuf-dev protobuf-compiler libqrencode-dev"
 
 # Wallet RPC user and password
@@ -307,7 +307,7 @@ make_coin () {
 
 	cd $COIN_INSTALL
 	./autogen.sh
-	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" CXXFLAGS="--param ggc-min-expand=1 --param ggc-min-heapsize=32768" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
+	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
 	#if [ "$CPU_CORE" = "4" ]; then
 	#	make -j2 && make install
 	#else
