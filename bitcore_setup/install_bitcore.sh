@@ -541,9 +541,10 @@ finish () {
 	/usr/bin/crontab -u root -r
 
 	#
-	# Install Raspian minimal GUI
+	# Install Raspian Desktop
 	
-	apt-get install --no-install-recommends xserver-xorg xinit raspberrypi-ui-mods lxsession -y
+	apt-get install --no-install-recommends xserver-xorg -y
+	apt-get install raspberrypi-ui-mods xrdp chromium-browser -y
 		
 	chage -d 0 ${ssuser}
 
