@@ -308,11 +308,11 @@ make_coin () {
 	cd $COIN_INSTALL
 	./autogen.sh
 	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
-	#if [ "$CPU_CORE" = "4" ]; then
-	#	make -j2 && make install
-	#else
+	if [ "$CPU_CORE" = "4" ]; then
+		make -j2 && make install
+	else
 		make && make install
-	#fi
+	fi
 
 
 }
@@ -332,7 +332,7 @@ configure_coin_conf () {
 	rpcport=${COIN_RPCPORT}
 	server=1
 	listen=1
-	daemon=1
+	daemon=0
 	logtimestamps=1
 	txindex=1
 	masternode=0
@@ -542,6 +542,7 @@ finish () {
 
 	#
 	# Install Raspian Desktop
+	# https://www.raspberrypi.org/forums/viewtopic.php?f=66&t=133691
 	
 	apt-get install --no-install-recommends xserver-xorg -y
 	apt-get install raspberrypi-ui-mods xrdp chromium-browser -y
