@@ -1,5 +1,5 @@
 # BitCore_PI
-## BitCore for Raspberry Pi 4 (2GB or 4GB RAM Version only) (with Desktop/RDP)
+## BitCore for Raspberry Pi 4 (2GB or 4GB RAM Version only) (with Desktop RPD and Remonte SSH/RDP)
 
 Needs:
 
