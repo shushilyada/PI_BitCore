@@ -37,7 +37,7 @@ sudo bitcore-cli help                # list of commands
 ## Configfile
 The configfile for bitcore is stored in:
 ```
-/root/.bitcore/bitcore.conf
+/home/bitcore/.bitcore/bitcore.conf
 ```
 Settings during installation:
 ```
@@ -49,9 +49,13 @@ rpcport=8560
 server=1
 listen=1
 daemon=1
+maxconnections=64
 logtimestamps=1
 txindex=1
-masternode=0
+externalip="Your IPv4 adress":8555
+masternodeaddr=127.0.0.1:8555
+masternode=1
+masternodeprivkey="Your Masternode Key"
 
 #############
 # NODE LIST #
