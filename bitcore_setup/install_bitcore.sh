@@ -16,7 +16,7 @@ COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 # DIRS
 ROOT="/root/"
 INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
-COIN_ROOT="${ROOT}.${COIN}"
+COIN_ROOT="/home/${COIN}.${COIN}"
 COIN_INSTALL="${ROOT}${COIN}"
 BDB_PREFIX="${COIN_INSTALL}/db4"
 
@@ -48,6 +48,8 @@ LOG_FILE="make.log"
 # System Settings
 checkForRaspbian=$(cat /proc/cpuinfo | grep 'Revision')
 CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l)
+RPI_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+COIN_EXTERNALIP=$(curl -s4 icanhazip.com)
 
 start () {
 
@@ -80,35 +82,6 @@ app_install () {
 
 
 manage_swap () {
-
-	#
-	# Some vendors already have swap set up, so only create it if it's not already there.
-
-	exists="$(swapon --show | grep 'partition')"
-
-	if [ -z "$exists" ]; then
-
-		# https://www.2daygeek.com/shell-script-create-add-extend-swap-space-linux/#
-
-		newswapsize=2048
-
-		grep -q "swapfile" /etc/fstab
-
-		if [ $? -ne 0 ]; then
-
-			fallocate -l ${newswapsize}M /swapfile
-
-			chmod 600 /swapfile
-
-			mkswap /swapfile
-
-			swapon /swapfile
-
-			echo '/swapfile none swap defaults 0 0' >> /etc/fstab
-
-		fi
-
-	fi
 
 	# On a Raspberry Pi, the default swap is 100MB. This is a little restrictive, so we are
 	# expanding it to a full 2GB of swap.
@@ -158,11 +131,11 @@ disable_bluetooth () {
 		# First, lets not assume that an entry doesn't already exist, so let's purge any preexisting
 		# bluetooth variables from the respective file.
 
-		sed -i '/pi3-disable-bt/d' /boot/config.txt
+		sed -i '/disable-bt/d' /boot/config.txt
 
 		# Now, let's append the variable and value to the end of the file.
 
-		echo "dtoverlay=pi3-disable-bt" >> /boot/config.txt
+		echo "dtoverlay=disable-bt" >> /boot/config.txt
 
 		# Next, we remove the bluetooth package that was previously installed.
 
@@ -242,8 +215,6 @@ prepair_system () {
 	wget $COIN_BLOCKCHAIN
 	unzip ${COIN_BLOCKCHAIN_VERSION}.zip -d $COIN_ROOT && rm ${COIN_BLOCKCHAIN_VERSION}.zip
 
-	chown -R root:root ${COIN_ROOT}
-
 
 }
 
@@ -291,7 +262,7 @@ make_db () {
 	cd ${ROOT}/db-${DB_VERSION}.NC/build_unix/
 	../dist/configure --enable-cxx --disable-shared --with-pic --prefix=${BDB_PREFIX}
 	if [ "$CPU_CORE" = "4" ]; then
-		make -j2 && make install
+		make -j3 && make install
 	else
 		make && make install
 	fi
@@ -309,7 +280,7 @@ make_coin () {
 	./autogen.sh
 	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
 	if [ "$CPU_CORE" = "4" ]; then
-		make -j2 && make install
+		make -j3 && make install
 	else
 		make && make install
 	fi
@@ -332,11 +303,15 @@ configure_coin_conf () {
 	rpcport=${COIN_RPCPORT}
 	server=1
 	listen=1
-	daemon=0
+	daemon=1
+	maxconnections=64
 	logtimestamps=1
 	txindex=1
+	externalip=$($COIN_EXTERNALIP):$($COIN_PORT)
+	masternodeaddr=127.0.0.1:$($COIN_PORT)
 	masternode=0
-	
+	#masternodeprivkey=
+
 	#############
 	# NODE LIST #
 	#############" > ${COIN_ROOT}/${COIN}.conf
@@ -525,6 +500,16 @@ watch_synch () {
 }
 
 
+masternode_on () {
+
+	#
+	# We now activation the masternode and generating a masternode key
+
+	COIN_MN_KEY=$(${COIN_CLI} masternode genkey)
+
+	sed -i 's/masternode=0/masternode=1/' ${COIN_ROOT}/${COIN}.conf
+	sed -i 's/#masternodeprivkey=/masternodeprivkey=$($COIN_MN_KEY)/' ${COIN_ROOT}/${COIN}.conf
+
 
 finish () {
 
@@ -543,10 +528,10 @@ finish () {
 	#
 	# Install Raspian Desktop
 	# https://www.raspberrypi.org/forums/viewtopic.php?f=66&t=133691
-	
+
 	apt-get install --no-install-recommends xserver-xorg -y
 	apt-get install raspberrypi-ui-mods xrdp chromium-browser -y
-		
+
 	chage -d 0 ${ssuser}
 
 	echo " "
@@ -556,12 +541,20 @@ finish () {
 	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
 	echo "!!! Please change the password !!!"
 	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
+	echo " "
 	echo "User: ${ssuser}  Password: ${sspassword}"
+	echo "Masternode IP: ${COIN_EXTERNALIP}:${COIN_PORT}"
+	echo "Masternode Key: ${COIN_MN_KEY}"
 	echo " "
 	echo " "
 	echo "reboot in 60 sec... "
 
 	sleep 60s
+
+	#
+	# Disable the service for running the QT Version :-)
+	systemctl stop ${COIN}.service
+	systemctl disable ${COIN}.service
 
 	/sbin/reboot
 
