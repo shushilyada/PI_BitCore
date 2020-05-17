@@ -16,7 +16,7 @@ COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 # DIRS
 ROOT="/root/"
 INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
-COIN_ROOT="/home/${COIN}.${COIN}"
+COIN_ROOT="/home/${COIN}/.${COIN}"
 COIN_INSTALL="${ROOT}${COIN}"
 BDB_PREFIX="${COIN_INSTALL}/db4"
 
