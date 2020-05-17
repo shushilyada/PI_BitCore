@@ -511,6 +511,9 @@ masternode_on () {
 	sed -i 's/#masternodeprivkey=/masternodeprivkey=$($COIN_MN_KEY)/' ${COIN_ROOT}/${COIN}.conf
 
 
+}
+
+
 finish () {
 
 	#
