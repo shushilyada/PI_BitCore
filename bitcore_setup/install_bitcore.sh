@@ -567,6 +567,16 @@ finish () {
 
 	# Set the GPU Mem for GUI (The default is 64 MB but we have enough memory)
 	sed -i 's/gpu_mem=16/gpu_mem=256/' /boot/config.txt
+	# Set HDMI Mode
+	echo "hdmi_enable_4kp60=1" >> /boot/config.txt
+	sed -i 's/#hdmi_force_hotplug=1/hdmi_force_hotplug=1/' /boot/config.txt
+	sed -i 's/dtoverlay=vc4-fkms-v3d/#dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+	# Set resolution to 1080p 60Hz
+	sed -i 's/#hdmi_group=1/hdmi_group=2/' /boot/config.txt
+	sed -i 's/#hdmi_mode=1/hdmi_mode=82/' /boot/config.txt
+	# Set Boot in to GUI with Login
+	sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
+
 
 	/sbin/reboot
 
