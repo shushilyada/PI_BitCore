@@ -556,6 +556,9 @@ finish () {
 	systemctl stop ${COIN}.service
 	systemctl disable ${COIN}.service
 
+	# Set the GPU Mem for GUI (The default is 64 MB but we have enough memory)
+	sed -i 's/gpu_mem=16/gpu_mem=256/' /boot/config.txt
+
 	/sbin/reboot
 
 
@@ -582,6 +585,7 @@ else
 		configure_service
 		checkrunning
 		watch_synch
+		masternode_on
 		finish
 
 	else
