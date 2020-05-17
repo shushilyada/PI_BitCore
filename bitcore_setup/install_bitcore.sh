@@ -16,7 +16,7 @@ COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 # DIRS
 ROOT="/root/"
 INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
-COIN_ROOT="/home/${COIN}/.${COIN}"
+COIN_ROOT="${ROOT}.${COIN}"
 COIN_INSTALL="${ROOT}${COIN}"
 BDB_PREFIX="${COIN_INSTALL}/db4"
 
@@ -316,8 +316,6 @@ configure_coin_conf () {
 	# NODE LIST #
 	#############" > ${COIN_ROOT}/${COIN}.conf
 
-	chmod 660 ${COIN_ROOT}/*.conf
-	
 	COIN_NODES=$(curl $COIN_NODE | jq '.[] | .nodes[]' |  /bin/sed 's/"//g')
 
 		for addnode in $COIN_NODES; do
@@ -424,8 +422,8 @@ configure_service () {
 	User=root
 	Group=root
 	Type=forking
-	ExecStart=${COIND} -daemon -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT}
-	ExecStop=${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} stop
+	ExecStart=${COIND} -daemon -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} -walletdir=${COIN_ROOT}
+	ExecStop=${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} stop 
 	Restart=always
 	PrivateTmp=true
 	TimeoutStopSec=90s
@@ -529,11 +527,19 @@ finish () {
 	/usr/bin/crontab -u root -r
 
 	#
+	# Move Blockchain to User
+	/bin/mv /root/.${COIN}/ /home/${COIN}/
+	/bin/chown -R -f ${COIN}:${COIN} /home/${COIN}/.${COIN}
+	/bin/chmod 770 /home/${COIN}/.${COIN} -R
+
+	#
 	# Install Raspian Desktop
 	# https://www.raspberrypi.org/forums/viewtopic.php?f=66&t=133691
 
 	apt-get install --no-install-recommends xserver-xorg -y
-	apt-get install raspberrypi-ui-mods xrdp chromium-browser -y
+	apt-get install raspberrypi-ui-mods -y
+	apt-get install chromium-browser -y 
+	apt-get install xrdp -y
 
 	chage -d 0 ${ssuser}
 
