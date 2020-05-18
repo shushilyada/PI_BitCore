@@ -528,6 +528,7 @@ finish () {
 	#
 	# Move Blockchain to User
 	/bin/mv /root/.${COIN}/ /home/${COIN}/
+	cp /root/PI_${COIN_NAME}/${COIN}_setup/*.jpg /home/${COIN}/.${COIN}
 	/bin/chown -R -f ${COIN}:${COIN} /home/${COIN}/.${COIN}
 	/bin/chmod 770 /home/${COIN}/.${COIN} -R
 
@@ -557,8 +558,6 @@ finish () {
 	echo " "
 	echo "reboot in 60 sec... "
 
-	sleep 60s
-
 	#
 	# Disable the service for running the QT Version :-)
 	systemctl stop ${COIN}.service
@@ -576,6 +575,41 @@ finish () {
 	# Set Boot in to GUI with Login
 	#sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
 
+	# Set Desktop Application
+	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png /home/${COIN}/.${COIN}/
+	/home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	echo "
+	[Desktop Entry]
+	Name=${COIN_NAME} QT
+	Comment=Blockchain Wallet from ${COIN_NAME}
+	Exec=${COIN}-qt
+	Icon=/home/${COIN}/.${COIN}/${COIN}_icon.png
+	Terminal=false
+	Type=Application
+	Categories=Blockchain;
+	Keywords=blockchain;wallet;${COIN};
+	" > /home/${COIN}/.local/share/applications/{COIN}-qt.desktop
+	cp /home/${COIN}/.local/share/applications/{COIN}-qt.desktop /home/${COIN}/Desktop/
+	/bin/chown -f ${COIN}:${COIN} /home/${COIN}/.local/share/applications/${COIN}-qt.desktop
+	/bin/chmod 770 /home/${COIN}/.local/share/applications/${COIN}-qt.desktop
+
+	# Set Desktop Wallpaper
+	echo "
+	[*]
+	desktop_bg=#000000000000
+	desktop_shadow=#000000000000
+	desktop_fg=#d2d22e2eabab
+	desktop_font=Monospace 12
+	wallpaper=/home/${COIN}/.${COIN}/${COIN}_wallpaper.jpg
+	wallpaper_mode=fit
+	show_documents=0
+	show_trash=1
+	show_mounts=1
+	" > /home/${COIN}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	/bin/chown -f ${COIN}:${COIN} /home/${COIN}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	/bin/chmod 770 /home/${COIN}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+
+	sleep 60s
 
 	/sbin/reboot
 
