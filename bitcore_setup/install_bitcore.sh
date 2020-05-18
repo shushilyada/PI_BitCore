@@ -505,7 +505,7 @@ masternode_on () {
 	COIN_MN_KEY=$(${COIN_CLI} masternode genkey)
 
 	sed -i 's/masternode=0/masternode=1/' ${COIN_ROOT}/${COIN}.conf
-	sed -i 's/#masternodeprivkey=/masternodeprivkey=$($COIN_MN_KEY)/' ${COIN_ROOT}/${COIN}.conf
+	sed -i 's/#masternodeprivkey=/masternodeprivkey=${COIN_MN_KEY}/' ${COIN_ROOT}/${COIN}.conf
 
 
 }
