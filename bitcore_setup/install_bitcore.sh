@@ -50,7 +50,7 @@ LOG_FILE="make.log"
 checkForRaspbian=$(cat /proc/cpuinfo | grep 'Revision')
 CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l)
 RPI_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-COIN_EXTERNALIP=$(curl -s4 icanhazip.com)
+
 
 start () {
 
@@ -295,6 +295,8 @@ configure_coin_conf () {
 
 	#
 	# Set the coin config file .conf
+
+	COIN_EXTERNALIP=$(curl -s4 icanhazip.com)
 
 	echo "
 
