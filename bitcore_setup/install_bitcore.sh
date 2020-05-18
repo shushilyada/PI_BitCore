@@ -307,8 +307,8 @@ configure_coin_conf () {
 	maxconnections=64
 	logtimestamps=1
 	txindex=1
-	externalip=$($COIN_EXTERNALIP):$($COIN_PORT)
-	masternodeaddr=127.0.0.1:$($COIN_PORT)
+	externalip=${COIN_EXTERNALIP}:${COIN_PORT}
+	masternodeaddr=127.0.0.1:${COIN_PORT}
 	masternode=0
 	#masternodeprivkey=
 
@@ -380,16 +380,9 @@ config_fail2ban () {
 	port		= ssh
 	logpath		= %(sshd_log)s
 	maxretry = 3
-
-	[sshd-ddos]
-	# This jail corresponds to the standard configuration in Fail2ban.
-	port    = ssh
-	logpath = %(sshd_log)s
-	maxretry = 2
-
 	" > /etc/fail2ban/jail.local
 
-	service fail2ban start
+	fail2ban-client reload
 
 
 }
@@ -400,9 +393,9 @@ swap_off () {
 	#
 	# swap off/disable for safe your SD-Card
 
-	swapoff -a
-	service dphys-swapfile stop
-	systemctl disable dphys-swapfile
+	/sbin/swapoff -a
+	/usr/sbin/service dphys-swapfile stop
+	/bin/systemctl disable dphys-swapfile
 
 
 }
@@ -435,10 +428,10 @@ configure_service () {
 
 	" > /etc/systemd/system/${COIN}.service
 
-	systemctl daemon-reload
+	/bin/systemctl daemon-reload
 	sleep 5
-	systemctl start ${COIN}.service
-	systemctl enable ${COIN}.service >/dev/null 2>&1
+	/bin/systemctl start ${COIN}.service
+	/bin/systemctl enable ${COIN}.service >/dev/null 2>&1
 
 
 }
