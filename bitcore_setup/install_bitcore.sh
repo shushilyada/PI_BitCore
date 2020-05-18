@@ -341,6 +341,8 @@ config_ufw () {
 	/usr/sbin/ufw limit 22/tcp
 	# COIN_PORT
 	/usr/sbin/ufw allow ${COIN_PORT}/tcp
+	# RDP Port
+	/usr/sbin/ufw allow 3389
 	/usr/sbin/ufw default deny incoming
 	/usr/sbin/ufw default allow outgoing
 	yes | /usr/sbin/ufw enable
