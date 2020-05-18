@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # BASICS
+SCRIPT_VERSION="18052020"
 COIN_NAME="BitCore"
 COIN=$(echo ${COIN_NAME} | tr '[:upper:]' '[:lower:]')
 COIN_PORT="8555"
@@ -237,6 +238,7 @@ restart_pi () {
 	# restart the system
 
 	/usr/bin/touch /boot/${COIN}setup
+	echo "SCRIPTVERSION=${SCRIPT_VERSION}" >> /boot/${COIN}setup
 
 	echo "restarting the system... "
 	echo " "
