@@ -572,7 +572,7 @@ finish () {
 	sed -i 's/#hdmi_group=1/hdmi_group=2/' /boot/config.txt
 	sed -i 's/#hdmi_mode=1/hdmi_mode=82/' /boot/config.txt
 	# Set Boot in to GUI with Login
-	sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
+	#sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
 
 
 	/sbin/reboot
