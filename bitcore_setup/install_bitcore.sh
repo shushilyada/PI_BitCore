@@ -536,7 +536,7 @@ finish () {
 	chage -d 0 ${ssuser}
 
 	echo " "
-	echo "${COIN} is installed. Thanks for your support :-)"
+	echo "${COIN_NAME} is installed. Thanks for your support :-)"
 	echo " "
 	echo " "
 	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
@@ -587,8 +587,8 @@ finish () {
 	Type=Application
 	Categories=Blockchain;
 	Keywords=blockchain;wallet;${COIN};
-	" > ${HOME}.local/share/applications/{COIN}-qt.desktop
-	cp ${HOME}.local/share/applications/{COIN}-qt.desktop ${HOME}Desktop/
+	" > ${HOME}.local/share/applications/${COIN}-qt.desktop
+	cp ${HOME}.local/share/applications/${COIN}-qt.desktop ${HOME}Desktop/
 	/bin/chown -f ${COIN}:${COIN} ${HOME}.local/share/applications/${COIN}-qt.desktop
 	/bin/chmod 770 ${HOME}.local/share/applications/${COIN}-qt.desktop
 	#
