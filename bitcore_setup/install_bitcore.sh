@@ -11,6 +11,7 @@ COIN_BLOCKCHAIN_VERSION="z_bootstrap"
 COIN_BLOCKCHAIN="https://github.com/LIMXTEC/${COIN_NAME}/releases/download/0.90.9.1/${COIN_BLOCKCHAIN_VERSION}.zip"
 COIND="/usr/local/bin/${COIN}d"
 COIN_CLI="/usr/local/bin/${COIN}-cli"
+COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT}"
 COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
 COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
@@ -413,7 +414,7 @@ configure_service () {
 	Group=root
 	Type=forking
 	ExecStart=${COIND} -daemon -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} -walletdir=${COIN_ROOT}
-	ExecStop=${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} stop 
+	ExecStop=${COIN_CLI_COMMAND} stop 
 	Restart=always
 	PrivateTmp=true
 	TimeoutStopSec=90s
@@ -441,9 +442,9 @@ checkrunning () {
 
 	echo " ... waiting of ${COIN}.service ... please wait!..."
 	sleep 5
-	while ! ${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} -getinfo >/dev/null 2>&1; do
+	while ! ${COIN_CLI_COMMAND} -getinfo >/dev/null 2>&1; do
 		sleep 5
-		error=$(${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} -getinfo 2>&1 | cut -d: -f4 | tr -d "}")
+		error=$(${COIN_CLI_COMMAND} -getinfo 2>&1 | cut -d: -f4 | tr -d "}")
 		echo " ... ${COIN}.service is on : $error"
 		sleep 2
 	done
@@ -468,7 +469,7 @@ watch_synch () {
 	while true; do
 
 	set_blockhigh=$(curl -s ${COIN_BLOCKEXPLORER})
-	get_blockhigh=$(${COIN_CLI} getblockcount)
+	get_blockhigh=$(${COIN_CLI_COMMAND} getblockcount)
 
 	if [ "$get_blockhigh" -lt "$set_blockhigh" ]
 	then
@@ -493,7 +494,7 @@ masternode_on () {
 	#
 	# We now activation the masternode and generating a masternode key
 
-	COIN_MN_KEY=$(${COIN_CLI} masternode genkey)
+	COIN_MN_KEY=$(${COIN_CLI_COMMAND} masternode genkey)
 
 	sed -i 's/masternode=0/masternode=1/' ${COIN_ROOT}/${COIN}.conf
 	sed -i ''s/#masternodeprivkey=/masternodeprivkey=$COIN_MN_KEY/'' ${COIN_ROOT}/${COIN}.conf
