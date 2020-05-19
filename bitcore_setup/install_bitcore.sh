@@ -89,10 +89,10 @@ manage_swap () {
 	# On a Raspberry Pi, the default swap is 100MB. This is a little restrictive, so we are
 	# expanding it to a full 2GB of swap. or disable when RPI4 4GB Version
 
-	if [ "RPI_RAM" < "3072" ]; then
+	if [ "$RPI_RAM" -lt "3072" ]; then
 	sed -i 's/CONF_SWAPSIZE=100/CONF_SWAPSIZE=2048/' /etc/dphys-swapfile
 	fi
-	if [ "RPI_RAM" > "3072" ]; then
+	if [ "$RPI_RAM" -gt "3072" ]; then
 	swap_off
 	fi
 
@@ -110,18 +110,13 @@ reduce_gpu_mem () {
 	# assign the param below to the minimum value in the /boot/config.txt file.
 
 	if [ ! -z "$checkForRaspbian" ]; then
-
 		# First, lets not assume that an entry doesn't already exist, so let's purge and preexisting
 		# gpu_mem variables from the respective file.
-
 		sed -i '/gpu_mem/d' /boot/config.txt
-
+		#
 		# Now, let's append the variable and value to the end of the file.
-
 		echo "gpu_mem=16" >> /boot/config.txt
-
 		echo "GPU memory was reduced to 16MB on reboot."
-
 	fi
 
 
@@ -134,17 +129,13 @@ disable_bluetooth () {
 
 		# First, lets not assume that an entry doesn't already exist, so let's purge any preexisting
 		# bluetooth variables from the respective file.
-
 		sed -i '/disable-bt/d' /boot/config.txt
-
+		#
 		# Now, let's append the variable and value to the end of the file.
-
 		echo "dtoverlay=disable-bt" >> /boot/config.txt
-
+		#
 		# Next, we remove the bluetooth package that was previously installed.
-
 		apt-get remove pi-bluetooth -y
-
 		echo "Bluetooth was uninstalled."
 
 	fi
@@ -156,13 +147,9 @@ disable_bluetooth () {
 set_network () {
 
 	ipaddr=$(ip route get 1 | awk '{print $NF;exit}')
-
-	hhostname="$(COIN)$(shuf -i 100000000-999999999 -n 1)"
-
+	hhostname="${COIN}$(shuf -i 100000000-999999999 -n 1)"
 	echo $hhostname > /etc/hostname && hostname -F /etc/hostname
-
 	echo $ipaddr $hhostname >> /etc/hosts
-
 	echo "Your Hostname is now : ${hhostname} "
 
 
@@ -174,31 +161,21 @@ set_accounts () {
 	#
 	# We don't always know the condition of the host OS, so let's look for several possibilities.
 	# This will disable the ability to log in directly as root.
-
 	sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
-
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
-
+	#
 	# Set the new username and password
-
 	adduser $ssuser --disabled-password --gecos ""
-
 	echo "$ssuser:$sspassword" | chpasswd
-
 	adduser $ssuser sudo
-
+	#
 	# We only need to lock the Pi account if this is a Raspberry Pi. Otherwise, ignore this step.
-
 	if [ ! -z "$checkForRaspbian" ]; then
-
+		#
 		# Let's lock the pi user account, no need to delete it.
-
 		usermod -L -e 1 pi
-
 		echo "The 'pi' login was locked. Please log in with '$ssuser'. The password is '$sspassword'."
-
 		sleep 5
-
 	fi
 
 
@@ -287,7 +264,7 @@ make_coin () {
 	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
 	#
 	# Set for RPI4 4GB Version 
-	if [ "RPI_RAM" > "3072" ]; then
+	if [ "$RPI_RAM" -gt "3072" ]; then
 		make -j3 && make install
 	else
 	#
@@ -347,10 +324,13 @@ config_ufw () {
 	/usr/sbin/ufw logging on
 	/usr/sbin/ufw allow 22/tcp
 	/usr/sbin/ufw limit 22/tcp
+	#
 	# COIN_PORT
 	/usr/sbin/ufw allow ${COIN_PORT}/tcp
+	#
 	# RDP Port
 	/usr/sbin/ufw allow 3389
+	#
 	/usr/sbin/ufw default deny incoming
 	/usr/sbin/ufw default allow outgoing
 	yes | /usr/sbin/ufw enable
@@ -408,7 +388,7 @@ swap_off () {
 	# swap off/disable for safe your SD-Card
 
 	IS_SWAPON=$(/sbin/swapon)
-	if [ $IS_SWAPON ]; then
+	if [ "$IS_SWAPON" ]; then
 	/sbin/swapoff -a
 	/usr/sbin/service dphys-swapfile stop
 	/bin/systemctl disable dphys-swapfile
@@ -581,16 +561,18 @@ finish () {
 	#
 	# Set the GPU Mem for GUI (The default is 64 MB but we have enough memory)
 	sed -i 's/gpu_mem=16/gpu_mem=256/' /boot/config.txt
+	#
 	# Set HDMI Mode
 	echo "hdmi_enable_4kp60=1" >> /boot/config.txt
 	sed -i 's/#hdmi_force_hotplug=1/hdmi_force_hotplug=1/' /boot/config.txt
 	sed -i 's/dtoverlay=vc4-fkms-v3d/#dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+	#
 	# Set resolution to 1080p 60Hz
 	sed -i 's/#hdmi_group=1/hdmi_group=2/' /boot/config.txt
 	sed -i 's/#hdmi_mode=1/hdmi_mode=82/' /boot/config.txt
 	# Set Boot in to GUI with Login
 	#sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
-
+	#
 	# Set Desktop Application
 	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png ${COIN_HOME}
 
@@ -608,7 +590,7 @@ finish () {
 	cp ${HOME}.local/share/applications/{COIN}-qt.desktop ${HOME}Desktop/
 	/bin/chown -f ${COIN}:${COIN} ${HOME}.local/share/applications/${COIN}-qt.desktop
 	/bin/chmod 770 ${HOME}.local/share/applications/${COIN}-qt.desktop
-
+	#
 	# Set Desktop Wallpaper
 	echo "
 	[*]
