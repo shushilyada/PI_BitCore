@@ -16,8 +16,10 @@ COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
 # DIRS
 ROOT="/root/"
-INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
+HOME="/home/${COIN}/"
 COIN_ROOT="${ROOT}.${COIN}"
+COIN_HOME="${HOME}.${COIN}"
+INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
 COIN_INSTALL="${ROOT}${COIN}"
 BDB_PREFIX="${COIN_INSTALL}/db4"
 
@@ -85,12 +87,13 @@ app_install () {
 manage_swap () {
 
 	# On a Raspberry Pi, the default swap is 100MB. This is a little restrictive, so we are
-	# expanding it to a full 2GB of swap.
+	# expanding it to a full 2GB of swap. or disable when RPI4 4GB Version
 
-	if [ ! -z "$checkForRaspbian" ]; then
-
+	if [ "RPI_RAM" < "3072" ]; then
 	sed -i 's/CONF_SWAPSIZE=100/CONF_SWAPSIZE=2048/' /etc/dphys-swapfile
-
+	fi
+	if [ "RPI_RAM" > "3072" ]; then
+	swap_off
 	fi
 
 
@@ -281,10 +284,14 @@ make_coin () {
 	cd $COIN_INSTALL
 	./autogen.sh
 	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
-	if [ "$CPU_CORE" = "4" ]; then
+	#
+	# Set for RPI4 4GB Version 
+	if [ "RPI_RAM" > "3072" ]; then
 		make -j3 && make install
 	else
-		make && make install
+	#
+	# Set for RPI4 2GB Version
+		make -j2 && make install
 	fi
 
 
@@ -296,7 +303,7 @@ configure_coin_conf () {
 	#
 	# Set the coin config file .conf
 
-	COIN_EXTERNALIP=$(curl -s4 icanhazip.com)
+	COIN_EXTERNALIP=$(curl -s icanhazip.com)
 
 	echo "
 
@@ -320,7 +327,7 @@ configure_coin_conf () {
 	# NODE LIST #
 	#############" > ${COIN_ROOT}/${COIN}.conf
 
-	COIN_NODES=$(curl $COIN_NODE | jq '.[] | .nodes[]' |  /bin/sed 's/"//g')
+	COIN_NODES=$(curl -s $COIN_NODE | jq '.[] | .nodes[]' |  /bin/sed 's/"//g')
 
 		for addnode in $COIN_NODES; do
 		echo "	addnode=$addnode" >> ${COIN_ROOT}/${COIN}.conf
@@ -399,9 +406,12 @@ swap_off () {
 	#
 	# swap off/disable for safe your SD-Card
 
+	IS_SWAPON=$(/sbin/swapon)
+	if [ $IS_SWAPON ]; then
 	/sbin/swapoff -a
 	/usr/sbin/service dphys-swapfile stop
 	/bin/systemctl disable dphys-swapfile
+	fi
 
 
 }
@@ -415,7 +425,7 @@ configure_service () {
 	echo "
 
 	[Unit]
-	Description=${COIN} service
+	Description=${COIN_NAME} Service
 	After=network.target
 	[Service]
 	User=root
@@ -470,13 +480,13 @@ watch_synch () {
 
 	sleep 5
 
-	set_blockhigh=$(curl ${COIN_BLOCKEXPLORER})
+	set_blockhigh=$(curl -s ${COIN_BLOCKEXPLORER})
 	echo "  The current blockhigh is now : ${set_blockhigh} ..."
 	echo "  -----------------------------------------"
 
 	while true; do
 
-	set_blockhigh=$(curl ${COIN_BLOCKEXPLORER})
+	set_blockhigh=$(curl -s ${COIN_BLOCKEXPLORER})
 	get_blockhigh=$(${COIN_CLI} getblockcount)
 
 	if [ "$get_blockhigh" -lt "$set_blockhigh" ]
@@ -505,7 +515,7 @@ masternode_on () {
 	COIN_MN_KEY=$(${COIN_CLI} masternode genkey)
 
 	sed -i 's/masternode=0/masternode=1/' ${COIN_ROOT}/${COIN}.conf
-	sed -i 's/#masternodeprivkey=/masternodeprivkey=${COIN_MN_KEY}/' ${COIN_ROOT}/${COIN}.conf
+	sed -i ''s/#masternodeprivkey=/masternodeprivkey=$COIN_MN_KEY/'' ${COIN_ROOT}/${COIN}.conf
 
 
 }
@@ -527,10 +537,10 @@ finish () {
 
 	#
 	# Move Blockchain to User
-	/bin/mv /root/.${COIN}/ /home/${COIN}/
-	cp /root/PI_${COIN_NAME}/${COIN}_setup/*.jpg /home/${COIN}/.${COIN}
-	/bin/chown -R -f ${COIN}:${COIN} /home/${COIN}/.${COIN}
-	/bin/chmod 770 /home/${COIN}/.${COIN} -R
+	/bin/mv ${COIN_ROOT} ${HOME}
+	cp /root/PI_${COIN_NAME}/${COIN}_setup/*.jpg ${COIN_HOME}
+	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}
+	/bin/chmod 770 ${COIN_HOME} -R
 
 	#
 	# Install Raspian Desktop
@@ -562,7 +572,12 @@ finish () {
 	# Disable the service for running the QT Version :-)
 	systemctl stop ${COIN}.service
 	systemctl disable ${COIN}.service
-
+	#
+	# Prepare the service for consoles
+	sed -i ''s/User=root/User=${COIN}/'' /etc/systemd/system/${COIN}.service
+	sed -i ''s/Group=root/Group=${COIN}/'' /etc/systemd/system/${COIN}.service
+	sed -i ''s#$COIN_ROOT#$COIN_HOME#g'' /etc/systemd/system/${COIN}.service
+	#
 	# Set the GPU Mem for GUI (The default is 64 MB but we have enough memory)
 	sed -i 's/gpu_mem=16/gpu_mem=256/' /boot/config.txt
 	# Set HDMI Mode
@@ -576,8 +591,8 @@ finish () {
 	#sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
 
 	# Set Desktop Application
-	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png /home/${COIN}/.${COIN}/
-	/home/pi/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png ${COIN_HOME}
+
 	echo "
 	[Desktop Entry]
 	Name=${COIN_NAME} QT
@@ -588,10 +603,10 @@ finish () {
 	Type=Application
 	Categories=Blockchain;
 	Keywords=blockchain;wallet;${COIN};
-	" > /home/${COIN}/.local/share/applications/{COIN}-qt.desktop
-	cp /home/${COIN}/.local/share/applications/{COIN}-qt.desktop /home/${COIN}/Desktop/
-	/bin/chown -f ${COIN}:${COIN} /home/${COIN}/.local/share/applications/${COIN}-qt.desktop
-	/bin/chmod 770 /home/${COIN}/.local/share/applications/${COIN}-qt.desktop
+	" > ${HOME}.local/share/applications/{COIN}-qt.desktop
+	cp ${HOME}.local/share/applications/{COIN}-qt.desktop ${HOME}Desktop/
+	/bin/chown -f ${COIN}:${COIN} ${HOME}.local/share/applications/${COIN}-qt.desktop
+	/bin/chmod 770 ${HOME}.local/share/applications/${COIN}-qt.desktop
 
 	# Set Desktop Wallpaper
 	echo "
@@ -600,14 +615,14 @@ finish () {
 	desktop_shadow=#000000000000
 	desktop_fg=#d2d22e2eabab
 	desktop_font=Monospace 12
-	wallpaper=/home/${COIN}/.${COIN}/${COIN}_wallpaper.jpg
+	wallpaper=${COIN_HOME}/${COIN}_wallpaper.jpg
 	wallpaper_mode=fit
 	show_documents=0
 	show_trash=1
 	show_mounts=1
-	" > /home/${COIN}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
-	/bin/chown -f ${COIN}:${COIN} /home/${COIN}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
-	/bin/chmod 770 /home/${COIN}/.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	" > ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	/bin/chown -f ${COIN}:${COIN} ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+	/bin/chmod 770 ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
 
 	sleep 60s
 
