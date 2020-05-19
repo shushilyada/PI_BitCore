@@ -23,7 +23,6 @@ apt-get -y update && apt-get -y install git
 		
 		cd /root/
 		git clone ${GIT_URL}
-		chmod 744 -R ${INSTALL_DIR}
 		mkdir ${LOG_DIR}
 		nohup ${INSTALL_FILE} >${LOG_DIR}${LOG_FILE} 2>&1 &
 		clear
