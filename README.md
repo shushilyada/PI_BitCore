@@ -12,13 +12,13 @@ wget -qO - https://raw.githubusercontent.com/SpecTurrican/PI_BitCore/master/setu
 ```
 The installation goes into the background. You can follow the installation with :
 ```
-tail -f /root/PI_BitCore/logfiles/start.log  # 1. Phase "Prepar the system"
+sudo tail -f /root/PI_BitCore/logfiles/start.log  # 1. Phase "Prepar the system"
 
 or
 
-tail -f /root/PI_BitCore/logfiles/make.log   # 2. Phase "Compiling"
+sudo tail -f /root/PI_BitCore/logfiles/make.log   # 2. Phase "Compiling"
 ```
-The installation takes about 6 hours.
+The installation takes about 3 hours.
 The Raspberry Pi is restarted 2 times during the installation.
 After the installation the following user and password is valid :
 ```
@@ -26,13 +26,22 @@ bitcore
 ```
 The first time you log in, you will be prompted to change your password. Please do this.
 
+You can with RDP (on Windows "mstsc") or via HDMI start the BitCore QT.
+
+You need only the console ?
+
+Start the service with:
+```
+sudo systemctl enable bitcore.service
+```
+
 If everything worked out, you can retrieve the status with the following command :
 ```
-sudo bitcore-cli -getinfo             # general information
-sudo bitcore-cli masternode status   # is the masternode running ?
-sudo bitcore-cli masternode count    # how much mastenode ?
-sudo bitcore-cli mnsync status       # returns the sync status
-sudo bitcore-cli help                # list of commands
+bitcore-cli -getinfo             # general information
+bitcore-cli masternode status   # is the masternode running ?
+bitcore-cli masternode count    # how much mastenode ?
+bitcore-cli mnsync status       # returns the sync status
+bitcore-cli help                # list of commands
 ```
 ## Configfile
 The configfile for bitcore is stored in:
@@ -66,7 +75,7 @@ addnode=add a node from https://chainz.cryptoid.info/btx/api.dws?q=nodes list
 ## Security
 - You have a Firewall or Router ? Please open the Port 8555 for your raspberry pi. Thanks!
 - fail2ban is configured with 24 hours banntime. (https://www.fail2ban.org/wiki/index.php/Main_Page)
-- ufw service open ports is 22 and 8555. (https://help.ubuntu.com/community/UFW)
+- ufw service open ports is 22 (SSH), 3389 (RDP) and 8555 (BitCore). (https://help.ubuntu.com/community/UFW)
 ## Infos about BitCore
 [Homepage](https://bitcore.cc/) | [Source GitHub](https://github.com/LIMXTEC/BitCore) | [Blockchainexplorer](https://chainz.cryptoid.info/btx/) | [Telegram](https://t.me/bitcore_cc) | [bitcointalk.org](https://bitcointalk.org/index.php?topic=1883902.0)
 
