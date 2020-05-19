@@ -80,3 +80,4 @@ addnode=add a node from https://chainz.cryptoid.info/btx/api.dws?q=nodes list
 [Homepage](https://bitcore.cc/) | [Source GitHub](https://github.com/LIMXTEC/BitCore) | [Blockchainexplorer](https://chainz.cryptoid.info/btx/) | [Telegram](https://t.me/bitcore_cc) | [bitcointalk.org](https://bitcointalk.org/index.php?topic=1883902.0)
 
 ## Have fun and thanks for your support :-)
+## BTX Spendadress : 2Q79SCjani8SKKarSrh5Dk4CXPfcYbDknU
