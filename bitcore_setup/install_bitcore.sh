@@ -78,7 +78,7 @@ app_install () {
 	# Install Tools
 
 	apt-get update && apt-get upgrade -y
-	apt-get install -y ${DEV_TOOLS} ${LIBRARIES}
+	apt-get install -y ${LIBRARIES} ${DEV_TOOLS}
 
 
 }
