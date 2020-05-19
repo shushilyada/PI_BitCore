@@ -218,6 +218,7 @@ prepair_system () {
 	mkdir $COIN_ROOT
 	wget $COIN_BLOCKCHAIN
 	unzip ${COIN_BLOCKCHAIN_VERSION}.zip -d $COIN_ROOT && rm ${COIN_BLOCKCHAIN_VERSION}.zip
+	chown -R root:root ${COIN_ROOT}
 
 
 }
@@ -459,11 +460,11 @@ checkrunning () {
 	# Is the service running ?
 
 	echo " ... waiting of ${COIN}.service ... please wait!..."
-
-	while ! ${COIN_CLI} -getinfo >/dev/null 2>&1; do
+	sleep 5
+	while ! ${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} -getinfo >/dev/null 2>&1; do
 		sleep 5
-		error=$(${COIN_CLI} -getinfo 2>&1 | cut -d: -f4 | tr -d "}")
-		echo " ... ${COIN}.service is on : ${error}"
+		error=$(${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT} -getinfo 2>&1 | cut -d: -f4 | tr -d "}")
+		echo " ... ${COIN}.service is on : $error"
 		sleep 2
 	done
 
