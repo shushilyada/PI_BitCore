@@ -11,7 +11,6 @@ COIN_BLOCKCHAIN_VERSION="z_bootstrap"
 COIN_BLOCKCHAIN="https://github.com/LIMXTEC/${COIN_NAME}/releases/download/0.90.9.1/${COIN_BLOCKCHAIN_VERSION}.zip"
 COIND="/usr/local/bin/${COIN}d"
 COIN_CLI="/usr/local/bin/${COIN}-cli"
-COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT}"
 COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
 COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
@@ -53,6 +52,9 @@ LOG_FILE="make.log"
 checkForRaspbian=$(cat /proc/cpuinfo | grep 'Revision')
 CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l)
 RPI_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
+
+# Commands
+COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT}"
 
 
 start () {
