@@ -576,7 +576,6 @@ finish () {
 	#
 	# Set Desktop Application
 	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png ${COIN_HOME}
-
 	echo "
 	[Desktop Entry]
 	Name=${COIN_NAME} QT
@@ -593,6 +592,7 @@ finish () {
 	/bin/chmod 770 ${HOME}.local/share/applications/${COIN}-qt.desktop
 	#
 	# Set Desktop Wallpaper
+	/bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
 	echo "
 	[*]
 	desktop_bg=#000000000000
