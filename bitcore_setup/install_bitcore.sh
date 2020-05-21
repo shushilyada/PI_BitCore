@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # BASICS
-SCRIPT_VERSION="18052020"
+SCRIPT_VERSION="21052020"
 COIN_NAME="BitCore"
 COIN=$(echo ${COIN_NAME} | tr '[:upper:]' '[:lower:]')
 COIN_PORT="8555"
@@ -36,17 +36,15 @@ DEV_TOOLS="build-essential libtool autotools-dev autoconf cmake pkg-config bsdma
 rrpcuser="${COIN}pi$(shuf -i 100000000-199999999 -n 1)"
 rrpcpassword="$(shuf -i 1000000000-3999999999 -n 1)$(shuf -i 1000000000-3999999999 -n 1)$(shuf -i 1000000000-3999999999 -n 1)"
 
-# User for System
-ssuser="${COIN}"
-sspassword="${COIN}"
-
 # Install Script
 SCRIPT_DIR="${INSTALL_DIR}${COIN}_setup/"
 SCRIPT_NAME="install_${COIN}.sh"
+SCRIPT_NAME_NEXT="config_desktop.sh"
 
 # Logfile
 LOG_DIR="${INSTALL_DIR}logfiles/"
 LOG_FILE="make.log"
+LOG_FILE_NEXT="config_desktop.log"
 
 # System Settings
 checkForRaspbian=$(cat /proc/cpuinfo | grep 'Revision')
@@ -166,16 +164,16 @@ set_accounts () {
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
 	#
 	# Set the new username and password
-	adduser $ssuser --disabled-password --gecos ""
-	echo "$ssuser:$sspassword" | chpasswd
-	adduser $ssuser sudo
+	adduser $COIN --disabled-password --gecos ""
+	echo "$COIN:$COIN" | chpasswd
+	adduser $COIN sudo
 	#
 	# We only need to lock the Pi account if this is a Raspberry Pi. Otherwise, ignore this step.
 	if [ ! -z "$checkForRaspbian" ]; then
 		#
 		# Let's lock the pi user account, no need to delete it.
 		usermod -L -e 1 pi
-		echo "The 'pi' login was locked. Please log in with '$ssuser'. The password is '$sspassword'."
+		echo "The 'pi' login was locked. Please log in with '$COIN'. The password is '$COIN'."
 		sleep 5
 	fi
 
@@ -227,7 +225,7 @@ restart_pi () {
 	echo "!!!!!!!!!!!!!!!!!"
 	echo "!!! New login !!!"
 	echo "!!!!!!!!!!!!!!!!!"
-	echo "User: ${ssuser}  Password: ${sspassword}"
+	echo "User: ${COIN}  Password: ${COIN}"
 	echo " "
 	echo " "
 
@@ -285,7 +283,6 @@ configure_coin_conf () {
 	COIN_EXTERNALIP=$(curl -s icanhazip.com)
 
 	echo "
-
 	rpcuser=${rrpcuser}
 	rpcpassword=${rrpcpassword}
 	rpcallowip=127.0.0.1
@@ -513,14 +510,30 @@ finish () {
 	# over. This helps if we have ot debug a problem in the future.
 
 	/usr/bin/touch /boot/ssh
-	/usr/bin/touch /boot/${COIN}service
+	echo $SCRIPTVERSION > /boot/${COIN}service
 
 	/usr/bin/crontab -u root -r
 
 	#
+	# Disable the service for running the QT Version :-)
+	systemctl stop ${COIN}.service
+	systemctl disable ${COIN}.service
+	sleep 10
+
+	#
+	# Prepare the service for console
+	sed -i ''s/User=root/User=${COIN}/'' /etc/systemd/system/${COIN}.service
+	sed -i ''s/Group=root/Group=${COIN}/'' /etc/systemd/system/${COIN}.service
+	sed -i ''s#$COIN_ROOT#$COIN_HOME#g'' /etc/systemd/system/${COIN}.service
+
+	#
 	# Move Blockchain to User
 	/bin/mv ${COIN_ROOT} ${HOME}
-	cp /root/PI_${COIN_NAME}/${COIN}_setup/*.jpg ${COIN_HOME}
+
+	#
+	# Set Permissions
+	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}.${COIN}
+	/bin/chmod 770 ${COIN_HOME} -R
 
 	#
 	# Install Raspian Desktop
@@ -531,84 +544,49 @@ finish () {
 	apt-get install chromium-browser -y 
 	apt-get install xrdp -y
 
-	# Passwordchange next login (only console)
-	#chage -d 0 ${ssuser}
-
-	echo " "
-	echo "${COIN_NAME} is installed. Thanks for your support :-)"
-	echo " "
-	echo " "
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	echo "!!! Please change the password !!!"
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	echo " "
-	echo "User: ${ssuser}  Password: ${sspassword}"
-	echo "Masternode IP: ${COIN_EXTERNALIP}:${COIN_PORT}"
-	echo "Masternode Key: ${COIN_MN_KEY}"
-	echo " "
-	echo " "
-	echo "reboot in 60 sec... "
-
-	#
-	# Disable the service for running the QT Version :-)
-	systemctl stop ${COIN}.service
-	systemctl disable ${COIN}.service
-	#
-	# Prepare the service for consoles
-	sed -i ''s/User=root/User=${COIN}/'' /etc/systemd/system/${COIN}.service
-	sed -i ''s/Group=root/Group=${COIN}/'' /etc/systemd/system/${COIN}.service
-	sed -i ''s#$COIN_ROOT#$COIN_HOME#g'' /etc/systemd/system/${COIN}.service
 	#
 	# Set the GPU Mem for GUI (The default is 64 MB but we have enough memory)
 	sed -i 's/gpu_mem=16/gpu_mem=256/' /boot/config.txt
+
 	#
 	# Set HDMI Mode
 	echo "hdmi_enable_4kp60=1" >> /boot/config.txt
 	sed -i 's/#hdmi_force_hotplug=1/hdmi_force_hotplug=1/' /boot/config.txt
 	sed -i 's/dtoverlay=vc4-fkms-v3d/#dtoverlay=vc4-fkms-v3d/' /boot/config.txt
+
 	#
 	# Set resolution to 1080p 60Hz
 	sed -i 's/#hdmi_group=1/hdmi_group=2/' /boot/config.txt
 	sed -i 's/#hdmi_mode=1/hdmi_mode=82/' /boot/config.txt
+
 	# Set Boot in to GUI with Login
 	#sed -i 's/$/ quiet splash plymouth.ignore-serial-consoles/' /boot/cmdline.txt
 	#
-	# Set Desktop Application
-	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png ${COIN_HOME}
-	/bin/mkdir -p ${HOME}.local/share/applications
-	/bin/mkdir -p ${HOME}Desktop
+	
+	# Passwordchange next login (only console)
+	#chage -d 0 ${COIN}
+
 	echo "
-	[Desktop Entry]
-	Name=${COIN_NAME} QT
-	Comment=Blockchain Wallet from ${COIN_NAME}
-	Exec=${COIN}-qt
-	Icon=/home/${COIN}/.${COIN}/${COIN}_icon.png
-	Terminal=false
-	Type=Application
-	Categories=Blockchain;
-	Keywords=blockchain;wallet;${COIN};
-	" > ${HOME}.local/share/applications/${COIN}-qt.desktop
-	cp ${HOME}.local/share/applications/${COIN}-qt.desktop ${HOME}Desktop/
-	#
-	# Set Desktop Wallpaper
-	/bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
-	echo "
-	[*]
-	desktop_bg=#000000000000
-	desktop_shadow=#000000000000
-	desktop_fg=#d2d22e2eabab
-	desktop_font=Monospace 12
-	wallpaper=${COIN_HOME}/${COIN}_wallpaper.jpg
-	wallpaper_mode=fit
-	show_documents=0
-	show_trash=1
-	show_mounts=1
-	" > ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+		${COIN_NAME} is installed. Thanks for your support :-)
+
+
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		!!! Please change the password !!!
+		!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		User: ${COIN}  Password: ${COIN}
+		Masternode IP: ${COIN_EXTERNALIP}:${COIN_PORT}
+		Masternode Key: ${COIN_MN_KEY}
+
+
+		reboot in 60 sec..." > ${HOME}info.txt
+
+	echo ${HOME}info.txt
 
 	#
-	# Set Permissions
-	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}
-	/bin/chmod 770 ${COIN_HOME} -R
+	# Prepare the next script
+	/usr/bin/crontab -u root -r
+	/usr/bin/crontab -u root -l | { cat; echo "@reboot		${SCRIPT_DIR}${SCRIPT_NAME_NEXT} >${LOG_DIR}${LOG_FILE_NEXT} 2>&1"; } | crontab -
 
 	sleep 60s
 
