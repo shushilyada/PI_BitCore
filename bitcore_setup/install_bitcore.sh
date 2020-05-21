@@ -149,10 +149,8 @@ disable_bluetooth () {
 
 set_network () {
 
-	ipaddr=$(ip route get 1 | awk '{print $NF;exit}')
 	hhostname="${COIN}$(shuf -i 100000000-999999999 -n 1)"
-	echo $hhostname > /etc/hostname && hostname -F /etc/hostname
-	echo $ipaddr $hhostname >> /etc/hosts
+	echo $hhostname
 	echo "Your Hostname is now : ${hhostname} "
 
 
@@ -577,6 +575,8 @@ finish () {
 	#
 	# Set Desktop Application
 	cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png ${COIN_HOME}
+	/bin/mkdir -p ${HOME}.local/share/applications
+	/bin/mkdir -p ${HOME}Desktop
 	echo "
 	[Desktop Entry]
 	Name=${COIN_NAME} QT
