@@ -523,8 +523,6 @@ finish () {
 	# Move Blockchain to User
 	/bin/mv ${COIN_ROOT} ${HOME}
 	cp /root/PI_${COIN_NAME}/${COIN}_setup/*.jpg ${COIN_HOME}
-	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}
-	/bin/chmod 770 ${COIN_HOME} -R
 
 	#
 	# Install Raspian Desktop
@@ -535,7 +533,8 @@ finish () {
 	apt-get install chromium-browser -y 
 	apt-get install xrdp -y
 
-	chage -d 0 ${ssuser}
+	# Passwordchange next login (only console)
+	#chage -d 0 ${ssuser}
 
 	echo " "
 	echo "${COIN_NAME} is installed. Thanks for your support :-)"
@@ -590,8 +589,6 @@ finish () {
 	Keywords=blockchain;wallet;${COIN};
 	" > ${HOME}.local/share/applications/${COIN}-qt.desktop
 	cp ${HOME}.local/share/applications/${COIN}-qt.desktop ${HOME}Desktop/
-	/bin/chown -f ${COIN}:${COIN} ${HOME}.local/share/applications/${COIN}-qt.desktop
-	/bin/chmod 770 ${HOME}.local/share/applications/${COIN}-qt.desktop
 	#
 	# Set Desktop Wallpaper
 	/bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
@@ -607,8 +604,11 @@ finish () {
 	show_trash=1
 	show_mounts=1
 	" > ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
-	/bin/chown -f ${COIN}:${COIN} ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
-	/bin/chmod 770 ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
+
+	#
+	# Set Permissions
+	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}
+	/bin/chmod 770 ${COIN_HOME} -R
 
 	sleep 60s
 
