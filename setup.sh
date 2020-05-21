@@ -20,14 +20,14 @@ apt-get -y update && apt-get -y install git
 
 	if [ -n "$OS" ]; then
 		if [ -n "OS_Version" ]; then
-		
+
 		cd /root/
 		git clone ${GIT_URL}
-		chmod 744 -R ${INSTALL_DIR}
-		mkdir ${LOG_DIR}
+		chmod 750 -R ${INSTALL_DIR}
+		[ ! -d "${LOG_DIR}" ] && /bin/mkdir ${LOG_DIR}
 		nohup ${INSTALL_FILE} >${LOG_DIR}${LOG_FILE} 2>&1 &
 		clear
-		
+
 		tail -f ${LOG_DIR}${LOG_FILE}
 
 		else

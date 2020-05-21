@@ -163,6 +163,9 @@ set_accounts () {
 	sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
 	#
+	# Set /etc/adduser.conf https://www.techrepublic.com/article/how-to-ensure-all-new-user-home-directories-are-created-without-world-readable-permissions-in-linux/
+	sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
+	#
 	# Set the new username and password
 	adduser $COIN --disabled-password --gecos ""
 	echo "$COIN:$COIN" | chpasswd
@@ -176,6 +179,9 @@ set_accounts () {
 		echo "The 'pi' login was locked. Please log in with '$COIN'. The password is '$COIN'."
 		sleep 5
 	fi
+	#
+	# Set Groups for the new user (same PI user) https://raspberrypi.stackexchange.com/questions/36322/cant-shutdown-or-reboot-from-gui-after-making-new-user
+	for GROUP in adm dialout cdrom sudo audio video plugdev games users netdev input spi i2c gpio; do sudo adduser newuser $GROUP; done
 
 
 }
@@ -188,10 +194,11 @@ prepair_system () {
 
 	apt-get autoremove -y
 	cd ${ROOT}
-	git clone $COIN_DOWNLOAD $COIN_INSTALL && mkdir $BDB_PREFIX
+	git clone $COIN_DOWNLOAD $COIN_INSTALL
+	[ ! -d "$BDB_PREFIX" ] && mkdir $BDB_PREFIX
 	wget $DB_DOWNLOAD
 	tar -xzvf $DB_FILE && rm $DB_FILE
-	mkdir $COIN_ROOT
+	[ ! -d "$COIN_ROOT" ] && mkdir $COIN_ROOT
 	wget $COIN_BLOCKCHAIN
 	unzip ${COIN_BLOCKCHAIN_VERSION}.zip -d $COIN_ROOT && rm ${COIN_BLOCKCHAIN_VERSION}.zip
 	chown -R root:root ${COIN_ROOT}
@@ -509,7 +516,7 @@ finish () {
 	# process. At least it will fail and the machine won't be looping a reboot/install over and
 	# over. This helps if we have ot debug a problem in the future.
 
-	/usr/bin/touch /boot/ssh
+	/usr/bin/touch /boot/${COIN}service
 	echo $SCRIPTVERSION > /boot/${COIN}service
 
 	/usr/bin/crontab -u root -r
@@ -533,7 +540,7 @@ finish () {
 	#
 	# Set Permissions
 	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}.${COIN}
-	/bin/chmod 770 ${COIN_HOME} -R
+	/bin/chmod 750 ${COIN_HOME}.${COIN} -R
 
 	#
 	# Install Raspian Desktop

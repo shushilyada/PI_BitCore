@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # BASICS
-SCRIPT_VERSION="18052020"
+SCRIPT_VERSION="21052020"
 COIN_NAME="BitCore"
 COIN=$(echo ${COIN_NAME} | tr '[:upper:]' '[:lower:]')
 COIND="/usr/local/bin/${COIN}d"
@@ -11,12 +11,11 @@ COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
 # DIRS
 HOME="/home/${COIN}/"
-COIN_HOME="${HOME}.${COIN}"
+COIN_HOME="${HOME}.${COIN}/"
 INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
-
-# User for System
-ssuser="${COIN}"
-sspassword="${COIN}"
+COIN_MEDIA="${HOME}MEDIA/"
+COIN_WALLPAPER="${COIN}_wallpaper.jpg"
+COIN_ICON="${COIN}_icon.png"
 
 # Install Script
 SCRIPT_DIR="${INSTALL_DIR}${COIN}_setup/"
@@ -32,44 +31,86 @@ CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l)
 RPI_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 
 # Commands
-COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}/${COIN}.conf -datadir=${COIN_ROOT}"
+COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}${COIN}.conf -datadir=${COIN_ROOT}"
+HOME_USER_COMMAND="sudo -u ${COIN}"
 
-#
-# Copy Wallpaper and Icons for Desktop
-cp /root/PI_${COIN_NAME}/${COIN}_setup/*.jpg ${COIN_HOME}
-cp /root/PI_${COIN_NAME}/${COIN}_setup/${COIN}_icon.png ${COIN_HOME}
-  
-# Set Desktop Application
+config_desktop () {
+	#
+	# Copy Wallpaper and Icons for Desktop
+	[ ! -d "$COIN_MEDIA" ] && $HOME_USER_COMMAND /bin/mkdir -p $COIN_MEDIA
+	$HOME_USER_COMMAND < ${SCRIPT_DIR}${COIN_WALLPAPER} sh -c 'cat > ${COIN_MEDIA}'
+	$HOME_USER_COMMAND < ${SCRIPT_DIR}${COIN_ICON} sh -c 'cat > ${COIN_MEDIA}'
 
-#/bin/mkdir -p ${HOME}.local/share/applications
-#/bin/mkdir -p ${HOME}Desktop
+	# Set Desktop Application
+	[ ! -d "${HOME}.local/share/applications" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}.local/share/applications
+	[ ! -d "${HOME}Desktop" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}Desktop
 
-  echo "
-    [Desktop Entry]
-    Name=${COIN_NAME} QT
-    Comment=Blockchain Wallet from ${COIN_NAME}
-    Exec=${COIN}-qt
-    Icon=/home/${COIN}/.${COIN}/${COIN}_icon.png
-    Terminal=false
-    Type=Application
-    Categories=Blockchain;
-    Keywords=blockchain;wallet;${COIN};
-  " > ${HOME}.local/share/applications/${COIN}-qt.desktop
-cp ${HOME}.local/share/applications/${COIN}-qt.desktop ${HOME}Desktop/
+	$HOME_USER_COMMAND echo "
+		[Desktop Entry]
+		Name=${COIN_NAME} QT
+		Comment=Blockchain Wallet from ${COIN_NAME}
+		Exec=${COIN}-qt
+		Icon=${COIN_MEDIA}${COIN_ICON}
+		Terminal=false
+		Type=Application
+		Categories=Blockchain;
+		Keywords=blockchain;wallet;${COIN};
+	" > ${HOME}.local/share/applications/${COIN}-qt.desktop
+	$HOME_USER_COMMAND cp ${HOME}.local/share/applications/${COIN}-qt.desktop ${HOME}Desktop/
 
-#
-# Set Desktop Wallpaper
-/bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
-	echo "
-	  [*]
-	  desktop_bg=#000000000000
-	  desktop_shadow=#000000000000
-	  desktop_fg=#d2d22e2eabab
-	  desktop_font=Monospace 12
-	  wallpaper=${COIN_HOME}/${COIN}_wallpaper.jpg
-	  wallpaper_mode=fit
-	  show_documents=0
-	  show_trash=1
-	  show_mounts=1
+	#
+	# Set Desktop Wallpaper
+	[ ! -d "${HOME}.config/pcmanfm/LXDE-pi" ] && /bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
+	$HOME_USER_COMMAND echo "
+		[*]
+		desktop_bg=#000000000000
+		desktop_shadow=#000000000000
+		desktop_fg=#d2d23232d2d2
+		desktop_font=Monospace 12
+		wallpaper=${COIN_MEDIA}${COIN_WALLPAPER}
+		wallpaper_mode=fit
+		show_documents=0
+		show_trash=1
+		show_mounts=1
 	" > ${HOME}.config/pcmanfm/LXDE-pi/desktop-items-0.conf
 
+	#
+	# Set Desktop
+	[ ! -d "${HOME}.config/lxsession/LXDE-pi" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}.config/lxsession/LXDE-pi
+	$HOME_USER_COMMAND echo "
+		[GTK]
+		sGtk/ColorScheme=selected_bg_color:#d2d23232d2d2\nselected_fg_color:#f0f0f0f0f0f0\nbar_bg_color:#d2d23232d2d2\nbar_fg_color:#000000000000\n
+		sGtk/FontName=Monospace 12
+		iGtk/ToolbarIconSize=3
+		sGtk/IconSizes=gtk-large-toolbar=24,24
+		iGtk/CursorThemeSize=24" > ${HOME}.config/lxsession/LXDE-pi/desktop.conf
+
+	#
+	# Copy info.txt (with Masternodekey and IP) on Desktop
+	$HOME_USER_COMMAND cp ${HOME}info.txt ${HOME}Desktop
+
+}
+
+finish () {
+
+	/usr/bin/touch /boot/${COIN}_config_desktop
+	echo $SCRIPTVERSION > /boot/${COIN}_config_desktop
+	/usr/bin/crontab -u root -r
+	echo "Desktop is finish ..."
+
+
+}
+
+
+	#
+	# Is the service installed ?
+
+	if [ -f /boot/${COIN}_config_desktop ]; then
+
+		echo "Previous ${COIN}_config_desktop detected. Install aborted."
+
+	else
+		config_desktop
+		finish
+	
+	fi
