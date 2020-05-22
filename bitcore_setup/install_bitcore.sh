@@ -148,8 +148,9 @@ disable_bluetooth () {
 set_network () {
 
 	hhostname="${COIN}$(shuf -i 100000000-999999999 -n 1)"
-	echo $hhostname
-	echo "Your Hostname is now : ${hhostname} "
+	echo $hhostname > /etc/hostname && hostname -F /etc/hostname
+	sed -i ''s/raspberrypi/${hhostname}/'' /etc/hosts
+	echo "Your Hostname is now : ${hhostname}"
 
 
 }
@@ -164,7 +165,7 @@ set_accounts () {
 	sed -i 's/PermitRootLogin without-password/PermitRootLogin no/' /etc/ssh/sshd_config
 	#
 	# Set /etc/adduser.conf https://www.techrepublic.com/article/how-to-ensure-all-new-user-home-directories-are-created-without-world-readable-permissions-in-linux/
-	sed -i 's/DIR_MODE=0755/DIR_MODE=0750/' /etc/adduser.conf
+	sed -i 's/DIR_MODE=0755/DIR_MODE=0770/' /etc/adduser.conf
 	#
 	# Set the new username and password
 	adduser $COIN --disabled-password --gecos ""
@@ -181,7 +182,7 @@ set_accounts () {
 	fi
 	#
 	# Set Groups for the new user (same PI user) https://raspberrypi.stackexchange.com/questions/36322/cant-shutdown-or-reboot-from-gui-after-making-new-user
-	for GROUP in adm dialout cdrom sudo audio video plugdev games users netdev input spi i2c gpio; do sudo adduser newuser $GROUP; done
+	for GROUP in adm dialout cdrom sudo audio video plugdev games users netdev input spi i2c gpio; do sudo adduser ${COIN} $GROUP; done
 
 
 }
@@ -539,8 +540,8 @@ finish () {
 
 	#
 	# Set Permissions
-	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}.${COIN}
-	/bin/chmod 750 ${COIN_HOME}.${COIN} -R
+	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}
+	/bin/chmod 750 ${COIN_HOME} -R
 
 	#
 	# Install Raspian Desktop
@@ -583,12 +584,11 @@ finish () {
 
 		User: ${COIN}  Password: ${COIN}
 		Masternode IP: ${COIN_EXTERNALIP}:${COIN_PORT}
-		Masternode Key: ${COIN_MN_KEY}
+		Masternode Key: ${COIN_MN_KEY}" > ${HOME}info.txt
 
+	cat ${HOME}info.txt
 
-		reboot in 60 sec..." > ${HOME}info.txt
-
-	echo ${HOME}info.txt
+	echo "reboot in 60 sec..."
 
 	#
 	# Prepare the next script

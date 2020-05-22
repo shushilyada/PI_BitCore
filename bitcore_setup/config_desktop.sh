@@ -9,10 +9,10 @@ COIN_CLI="/usr/local/bin/${COIN}-cli"
 COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
 COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
-# DIRS
+# DIRS00
 HOME="/home/${COIN}/"
 COIN_HOME="${HOME}.${COIN}/"
-INSTALL_DIR="${ROOT}PI_${COIN_NAME}/"
+INSTALL_DIR="/root/PI_${COIN_NAME}/"
 COIN_MEDIA="${HOME}MEDIA/"
 COIN_WALLPAPER="${COIN}_wallpaper.jpg"
 COIN_ICON="${COIN}_icon.png"
@@ -34,12 +34,25 @@ RPI_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
 COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}${COIN}.conf -datadir=${COIN_ROOT}"
 HOME_USER_COMMAND="sudo -u ${COIN}"
 
+# Application
+APPS="gedit ristretto"
+
+
+app_install () {
+
+	apt-get -y update && apt-get -y upgrade
+	apt-get install -y $APPS
+
+
+}
+
 config_desktop () {
 	#
 	# Copy Wallpaper and Icons for Desktop
 	[ ! -d "$COIN_MEDIA" ] && $HOME_USER_COMMAND /bin/mkdir -p $COIN_MEDIA
-	$HOME_USER_COMMAND < ${SCRIPT_DIR}${COIN_WALLPAPER} sh -c 'cat > ${COIN_MEDIA}'
-	$HOME_USER_COMMAND < ${SCRIPT_DIR}${COIN_ICON} sh -c 'cat > ${COIN_MEDIA}'
+	cp ${SCRIPT_DIR}${COIN_WALLPAPER} ${COIN_MEDIA}
+	cp ${SCRIPT_DIR}${COIN_ICON} ${COIN_MEDIA}
+	/bin/chown -R -f ${COIN} ${COIN_MEDIA}
 
 	# Set Desktop Application
 	[ ! -d "${HOME}.local/share/applications" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}.local/share/applications
@@ -110,6 +123,7 @@ finish () {
 		echo "Previous ${COIN}_config_desktop detected. Install aborted."
 
 	else
+		app_install
 		config_desktop
 		finish
 	
