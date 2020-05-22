@@ -24,9 +24,11 @@ After the installation the following user and password is valid :
 ```
 bitcore
 ```
-The first time you log in, you will be prompted to change your password. Please do this.
+Please change your password !!!
 
-You can with RDP (on Windows "mstsc") or via HDMI start the BitCore QT.
+You can with RDP (on Windows "mstsc") or via HDMI start the BitCore QT on the Desktop.
+
+In the File "info.txt" on your Desktop is the Masternode Key and External IP.
 
 You need only the console ?
 
