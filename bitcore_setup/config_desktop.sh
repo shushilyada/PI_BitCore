@@ -9,7 +9,7 @@ COIN_CLI="/usr/local/bin/${COIN}-cli"
 COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
 COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
-# DIRS00
+# DIRS
 HOME="/home/${COIN}/"
 COIN_HOME="${HOME}.${COIN}/"
 INSTALL_DIR="/root/PI_${COIN_NAME}/"
@@ -47,6 +47,7 @@ app_install () {
 }
 
 config_desktop () {
+
 	#
 	# Copy Wallpaper and Icons for Desktop
 	[ ! -d "$COIN_MEDIA" ] && $HOME_USER_COMMAND /bin/mkdir -p $COIN_MEDIA
@@ -54,10 +55,13 @@ config_desktop () {
 	cp ${SCRIPT_DIR}${COIN_ICON} ${COIN_MEDIA}
 	/bin/chown -R -f ${COIN} ${COIN_MEDIA}
 
+	#
 	# Set Desktop Application
 	[ ! -d "${HOME}.local/share/applications" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}.local/share/applications
 	[ ! -d "${HOME}Desktop" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}Desktop
 
+	#
+	# Set Menu Application
 	$HOME_USER_COMMAND echo "
 		[Desktop Entry]
 		Name=${COIN_NAME} QT
@@ -69,11 +73,19 @@ config_desktop () {
 		Categories=Blockchain;
 		Keywords=blockchain;wallet;${COIN};
 	" > ${HOME}.local/share/applications/${COIN}-qt.desktop
-	$HOME_USER_COMMAND cp ${HOME}.local/share/applications/${COIN}-qt.desktop ${HOME}Desktop/
+
+	#
+	# Set Desktop link
+	$HOME_USER_COMMAND echo "
+		[Desktop Entry]
+		Type=Link
+		Name=BitCore QT
+		Icon=/home/bitcore/MEDIA/bitcore_icon.png
+		URL=/home/bitcore/.local/share/applications/bitcore-qt.desktop" ${HOME}Desktop/${COIN}-qt.desktop
 
 	#
 	# Set Desktop Wallpaper
-	[ ! -d "${HOME}.config/pcmanfm/LXDE-pi" ] && /bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
+	[ ! -d "${HOME}.config/pcmanfm/LXDE-pi" ] && $HOME_USER_COMMAND /bin/mkdir -p ${HOME}.config/pcmanfm/LXDE-pi
 	$HOME_USER_COMMAND echo "
 		[*]
 		desktop_bg=#000000000000
