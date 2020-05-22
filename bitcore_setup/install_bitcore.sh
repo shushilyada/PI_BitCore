@@ -355,27 +355,18 @@ config_fail2ban () {
 
 
 	echo "
-
 	[sshd]
 	enabled	= true
 	bantime = 86400
 	banaction = ufw
-
-	[sshd-ddos]
-	enabled = true
-	bantime = 86400
-	banaction = ufw
-
 	" > /etc/fail2ban/jail.d/defaults-debian.conf
 
 	# Configure the fail2ban jail and set the frequency to 20 min and 3 polls.
 
 	echo "
-
 	#
 	# SSH
 	#
-
 	[sshd]
 	port		= ssh
 	logpath		= %(sshd_log)s
