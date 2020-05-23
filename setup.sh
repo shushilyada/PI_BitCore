@@ -16,6 +16,7 @@ INSTALL_FILE="${INSTALL_DIR}${SETUP}_setup/install_${SETUP}.sh"
 LOG_DIR="${INSTALL_DIR}logfiles/"
 LOG_FILE="start.log"
 
+sleep 2
 apt-get -y update && apt-get -y install git
 
 	if [ -n "$OS" ]; then

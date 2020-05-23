@@ -40,7 +40,9 @@ APPS="gedit ristretto"
 
 app_install () {
 
+	sleep 5
 	apt-get -y update && apt-get -y upgrade
+	sleep 2
 	apt-get install -y $APPS
 
 
@@ -81,7 +83,7 @@ config_desktop () {
 		Type=Link
 		Name=BitCore QT
 		Icon=/home/bitcore/MEDIA/bitcore_icon.png
-		URL=/home/bitcore/.local/share/applications/bitcore-qt.desktop" ${HOME}Desktop/${COIN}-qt.desktop
+		URL=/home/bitcore/.local/share/applications/bitcore-qt.desktop" > ${HOME}Desktop/${COIN}-qt.desktop
 
 	#
 	# Set Desktop Wallpaper

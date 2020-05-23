@@ -78,7 +78,9 @@ app_install () {
 	#
 	# Install Tools
 
+	sleep 2
 	apt-get update && apt-get upgrade -y
+	sleep 2
 	apt-get install -y ${LIBRARIES} ${DEV_TOOLS}
 
 
@@ -531,8 +533,8 @@ finish () {
 
 	#
 	# Set Permissions
-	/bin/chown -R -f ${COIN}:${COIN} ${COIN_HOME}
-	/bin/chmod 750 ${COIN_HOME} -R
+	/bin/chown -R -f ${COIN}:${ROOT} ${HOME}
+	/bin/chmod 770 ${HOME} -R
 
 	#
 	# Install Raspian Desktop
