@@ -4,6 +4,8 @@
 Needs:
 
 + ISO Raspbian Lite (https://www.raspberrypi.org/downloads/raspbian/)
++ 16GB SD-Card
++ A Raspberry Pi 4 (with minimum 2GB Ram)
 + Login as ROOT (start Raspberry Pi and login as 'pi' user... password is 'raspberry'... 'sudo su root')
 
 You can execute the following install script. Just copy/paste and hit "Enter"-key.
