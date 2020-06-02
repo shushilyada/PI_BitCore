@@ -81,6 +81,9 @@ addnode=add a node from https://chainz.cryptoid.info/btx/api.dws?q=nodes list
 ## Infos about BitCore
 [Homepage](https://bitcore.cc/) | [Source GitHub](https://github.com/LIMXTEC/BitCore) | [Blockchainexplorer](https://chainz.cryptoid.info/btx/) | [Telegram](https://t.me/bitcore_cc) | [bitcointalk.org](https://bitcointalk.org/index.php?topic=1883902.0)
 
+## Screenshoot
+![ScreenShot](https://raw.githubusercontent.com/SpecTurrican/PI_BitCore/master/bitcore_setup/Screenshot%20from%202020-05-22%2021-44-03.png?raw=true)
+
 ## Have fun and thanks for your support :-)
 BTX donate to :
 ```
