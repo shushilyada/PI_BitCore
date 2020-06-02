@@ -1,25 +1,23 @@
 # PI_BitCore
-## BitCore for Raspberry Pi 4 (2GB or 4GB RAM Version only) with Desktop RPD and remonte SSH/RDP control.
+## BitCore for Raspberry Pi 4 (2GB / 4GB or 8GB RAM Version only) with Desktop RPD and remonte SSH/RDP control.
 
 Needs:
 
 + ISO Raspbian Lite (https://www.raspberrypi.org/downloads/raspbian/)
 + Login as ROOT (start Raspberry Pi and login as 'pi' user... password is 'raspberry'... 'sudo su root')
 
-You can execute the following install script. Just copy/paste and hit return.
+You can execute the following install script. Just copy/paste and hit "Enter"-key.
 ```
 wget -qO - https://raw.githubusercontent.com/SpecTurrican/PI_BitCore/master/setup.sh | bash
 ```
 The installation goes into the background. You can follow the installation with :
 ```
 sudo tail -f /root/PI_BitCore/logfiles/start.log  # 1. Phase "Prepar the system"
-
-or
-
 sudo tail -f /root/PI_BitCore/logfiles/make.log   # 2. Phase "Compiling"
+sudo tail -f /root/PI_BitCore/logfiles/config_desktop.log   # 3. Phase "Configuration of the Bitcore user interface"
 ```
 The installation takes about 3 hours.
-The Raspberry Pi is restarted 2 times during the installation.
+The Raspberry Pi is restarted 3 times during the installation.
 After the installation the following user and password is valid :
 ```
 bitcore
