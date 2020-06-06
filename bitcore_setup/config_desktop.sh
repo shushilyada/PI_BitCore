@@ -4,10 +4,6 @@
 SCRIPT_VERSION="21052020"
 COIN_NAME="BitCore"
 COIN=$(echo ${COIN_NAME} | tr '[:upper:]' '[:lower:]')
-COIND="/usr/local/bin/${COIN}d"
-COIN_CLI="/usr/local/bin/${COIN}-cli"
-COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
-COIN_NODE="https://chainz.cryptoid.info/btx/api.dws?q=nodes"
 
 # DIRS
 HOME="/home/${COIN}/"
@@ -19,19 +15,13 @@ COIN_ICON="${COIN}_icon.png"
 
 # Install Script
 SCRIPT_DIR="${INSTALL_DIR}${COIN}_setup/"
-SCRIPT_NAME="install_${COIN}.sh"
+SCRIPT_NAME="config_desktop.sh"
 
 # Logfile
 LOG_DIR="${INSTALL_DIR}logfiles/"
 LOG_FILE="config_desktop.log"
 
-# System Settings
-checkForRaspbian=$(cat /proc/cpuinfo | grep 'Revision')
-CPU_CORE=$(cat /proc/cpuinfo | grep processor | wc -l)
-RPI_RAM=$(grep MemTotal /proc/meminfo | awk '{print $2}')
-
 # Commands
-COIN_CLI_COMMAND="${COIN_CLI} -conf=${COIN_ROOT}${COIN}.conf -datadir=${COIN_ROOT}"
 HOME_USER_COMMAND="sudo -u ${COIN}"
 
 # Application
@@ -81,9 +71,9 @@ config_desktop () {
 	$HOME_USER_COMMAND echo "
 		[Desktop Entry]
 		Type=Link
-		Name=BitCore QT
-		Icon=/home/bitcore/MEDIA/bitcore_icon.png
-		URL=/home/bitcore/.local/share/applications/bitcore-qt.desktop" > ${HOME}Desktop/${COIN}-qt.desktop
+		Name=${COIN_NAME} QT
+		Icon=${HOME}MEDIA/${COIN}_icon.png
+		URL=${HOME}.local/share/applications/${COIN}-qt.desktop" > ${HOME}Desktop/${COIN}-qt.desktop
 
 	#
 	# Set Desktop Wallpaper
