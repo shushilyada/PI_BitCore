@@ -533,7 +533,7 @@ finish () {
 
 	#
 	# Set Permissions
-	/bin/chown -R -f ${COIN}:${ROOT} ${HOME}
+	/bin/chown -R -f ${COIN}:root ${HOME}
 	/bin/chmod 770 ${HOME} -R
 
 	#
