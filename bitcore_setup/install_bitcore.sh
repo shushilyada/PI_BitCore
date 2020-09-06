@@ -1,14 +1,15 @@
 #!/bin/bash
 
 # BASICS
-SCRIPT_VERSION="21052020"
+SCRIPT_VERSION="06092020"
 COIN_NAME="BitCore"
 COIN=$(echo ${COIN_NAME} | tr '[:upper:]' '[:lower:]')
 COIN_PORT="8555"
 COIN_RPCPORT="8556"
 COIN_DOWNLOAD="https://github.com/LIMXTEC/${COIN_NAME}"
-COIN_BLOCKCHAIN_VERSION="z_bootstrap"
-COIN_BLOCKCHAIN="https://github.com/LIMXTEC/${COIN_NAME}/releases/download/0.90.9.1/${COIN_BLOCKCHAIN_VERSION}.zip"
+COIN_VERSION="$(curl -s ${COIN_DOWNLOAD}/releases/latest | cut -d'"' -f2 | cut -d'/' -f8)"
+COIN_BLOCKCHAIN_VERSION="bootstrap"
+COIN_BLOCKCHAIN="https://github.com/LIMXTEC/${COIN_NAME}/releases/download/${COIN_VERSION}/${COIN_BLOCKCHAIN_VERSION}.zip"
 COIND="/usr/local/bin/${COIN}d"
 COIN_CLI="/usr/local/bin/${COIN}-cli"
 COIN_BLOCKEXPLORER="https://chainz.cryptoid.info/btx/api.dws?q=getblockcount"
