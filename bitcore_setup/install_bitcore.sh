@@ -94,10 +94,10 @@ manage_swap () {
 	# On a Raspberry Pi, the default swap is 100MB. This is a little restrictive, so we are
 	# expanding it to a full 2GB of swap. or disable when RPI4 4GB Version
 
-	if [ "$RPI_RAM" -lt "3072" ]; then
+	if [ "$RPI_RAM" -lt "3072000" ]; then
 	sed -i 's/CONF_SWAPSIZE=100/CONF_SWAPSIZE=2048/' /etc/dphys-swapfile
 	fi
-	if [ "$RPI_RAM" -gt "3072" ]; then
+	if [ "$RPI_RAM" -gt "3072000" ]; then
 	swap_off
 	fi
 
@@ -275,7 +275,7 @@ make_coin () {
 	./configure LDFLAGS="-L${BDB_PREFIX}/lib/" CPPFLAGS="-I${BDB_PREFIX}/include/" --disable-tests --disable-gui-tests --disable-bench --without-miniupnpc
 	#
 	# Set for RPI4 4GB Version 
-	if [ "$RPI_RAM" -gt "3072" ]; then
+	if [ "$RPI_RAM" -gt "3072000" ]; then
 		make -j3 && make install
 	else
 	#
